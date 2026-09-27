@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Liv_Synch_Loader")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5e5fef5e79f17e83a3e458d3dbf68476f798ff4f")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6175a97137940c2e016cbe06a36c254275484fa4")]
 [assembly: System.Reflection.AssemblyProductAttribute("Liv_Synch_Loader")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Liv_Synch_Loader")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

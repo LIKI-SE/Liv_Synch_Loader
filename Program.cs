@@ -26,7 +26,46 @@ while (true){
     Console.WriteLine(" ");
     Console.WriteLine("Current source path: " + sourcePath);
     Console.WriteLine("Current destination path: " + destinationPath);
+
+    bool synchStatus(string sourcePath, string destinationPath){
+        string[] files = Directory.GetFiles(
+            sourcePath,
+            "*",
+            SearchOption.AllDirectories
+        );
     
+        foreach (string file in files)
+        {
+            string relativePath = Path.GetRelativePath(sourcePath, file);
+            string destinationFile = Path.Combine(destinationPath, relativePath);
+            
+
+            if (!File.Exists(destinationFile)){
+                return true;
+            }
+    
+            
+        }
+    
+        return false;
+    }
+
+    bool sourceMismatch = synchStatus(sourcePath, destinationPath);
+    bool destinationMismatch = synchStatus(destinationPath, sourcePath);
+
+    try{
+        if (sourceMismatch || destinationMismatch){
+                Console.WriteLine("!!!Synch needed!!!");
+    } else {
+        Console.WriteLine("Folders are synched!");   
+    }
+
+    }
+    catch{
+        Console.WriteLine("Something unexpected happened");
+    }
+
+
     string Synch = Console.ReadLine();
     
     switch (Synch){
@@ -151,6 +190,4 @@ while (true){
         break;
     
     }
-
 }
-

@@ -24,8 +24,8 @@ while (true){
     
     switch (Synch){
         case "A":
-            syncManager.SyncFiles();
-            break;
+        syncManager.SyncFiles();
+        break;
         
         case "B":
         syncManager.CustomPath();

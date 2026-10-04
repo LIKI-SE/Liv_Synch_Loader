@@ -20,6 +20,7 @@ while (true){
     syncManager.PathInfo();
 
     syncManager.SyncStatus();
+    
     string Synch = Console.ReadLine();
     
     switch (Synch){
@@ -47,6 +48,10 @@ while (true){
         syncManager.CloudPath();     
         break;
 
+        case "Å":
+        syncManager.Debugger();
+        break;
+
         case "Q":
         return;
         break;
@@ -65,9 +70,15 @@ while (true){
         
         string destinationCloudBackup;
 
+        public void SyncManager(){
+            sourceCloudBackup = sourcePath;
+            destinationCloudBackup = destinationPath;
+        }
         
         
         public void SyncFiles(){
+
+                   
             if (Directory.Exists(sourcePath) && Directory.Exists(destinationPath))
             {
                 DateTime dt = Directory.GetCreationTime(sourcePath);
@@ -88,12 +99,13 @@ while (true){
                         string destination = Path.Combine(destinationPath, filename);
                         string destinationFolder = Path.GetDirectoryName(destination);
                         DateTime dt_org = File.GetLastWriteTimeUtc(file);
-        
+ 
                         if (!Directory.Exists(destinationFolder))
                         {
                             Directory.CreateDirectory(destinationFolder);
                         }
-        
+
+                           
                         if (!File.Exists(destination))
                         {
                             File.Copy(file, destination);
@@ -103,12 +115,18 @@ while (true){
                         {
                             DateTime dt_copy = File.GetLastWriteTimeUtc(destination);
         
-                            if (dt_org != dt_copy)
+                            if (dt_org > dt_copy)
                             {
-                                Console.WriteLine("File out of synch: " + filename);
+                                Console.WriteLine("Source is newer: " + filename);
         
                                 File.Delete(destination);
                                 File.Copy(file, destination);
+                            }
+                            else if (dt_org < dt_copy)
+                            {
+                                Console.WriteLine("Destination is newer: " + filename);
+                                Console.WriteLine("Risk of overwriting!!! ");
+        
                             }
                             else
                             {
@@ -162,28 +180,33 @@ while (true){
             Console.WriteLine("Autocreated these paths: " + sourcePath + " & " + destinationPath);
         }
 
-        
-        public void CloudPath(){
+        public void CloudPath()
+        {
             Console.WriteLine("Transfer or Retrieve?");
-            string Answer = Console.ReadLine();
-     
-            if (Answer == "Transfer"){
+            SyncManager();
+            string answer = Console.ReadLine();
+            
+        
+            if (answer == "Transfer")
+            {
                 sourcePath = sourceCloudBackup;
                 destinationPath = cloudPath;
-                Console.WriteLine("Cloud transfer is enabled: " +  destinationPath);
-            } else if (Answer == "Retrieve") {
-                Console.WriteLine("RETRIEVE SOURCE: " + sourcePath);
-                Console.WriteLine("RETRIEVE DESTINATION: " + destinationPath);
-                destinationPath = destinationCloudBackup;
+            }
+            else if (answer == "Retrieve")
+            {
                 sourcePath = cloudPath;
-                Console.WriteLine("Cloud retrival is enabled: " +  destinationPath); 
-    
-        }
+                destinationPath = destinationCloudBackup;
+            }
         }
 
         public void PathInfo(){
             Console.WriteLine("Current source path: " + sourcePath);
             Console.WriteLine("Current destination path: " + destinationPath);
+        }
+
+        public void Debugger(){
+            Console.WriteLine(Directory.Exists(sourcePath));
+            Console.WriteLine(Directory.Exists(destinationPath));
         }
 
         public void SyncStatus(){
@@ -198,7 +221,25 @@ while (true){
                 {
                     string relativePath = Path.GetRelativePath(sourcePath, file);
                     string destinationFile = Path.Combine(destinationPath, relativePath);
+
+                    string fileName = Path.GetFileName(file);
                     
+                    if (fileName.StartsWith("~$"))
+                    {
+                        continue;
+                    }
+                    
+                    if (!File.Exists(destinationFile))
+                    {
+                        Console.WriteLine(
+                            "Mismatch: " + relativePath +
+                            " located at: " + destinationFile
+                        );
+                    
+                        return true;
+                    }
+                
+                            
         
                     if (!File.Exists(destinationFile)){
                         return true;
@@ -212,6 +253,13 @@ while (true){
         
             bool sourceMismatch = synchStatus(sourcePath, destinationPath);
             bool destinationMismatch = synchStatus(destinationPath, sourcePath);
+
+
+            if (sourcePath == null || destinationPath == null)
+            {
+                Console.WriteLine("A path has not been configured.");
+                return;
+            }
         
             try{
                 if (sourceMismatch || destinationMismatch){
@@ -219,6 +267,7 @@ while (true){
             } else {
                 Console.WriteLine("Folders are synched!");   
             }
+            
         
             }
             catch{
@@ -226,4 +275,3 @@ while (true){
             }
         }
     }
-   

@@ -15,15 +15,13 @@ while (true){
     Console.WriteLine("Press D for custom path");
     Console.WriteLine("Press E to swap synch direction");
     Console.WriteLine("Press F to cloud synchronization");
-    Console.WriteLine("Press T to test");
-    Console.WriteLine("Press Ø to Bacbkup");
     Console.WriteLine("Press Q to exit program");
     Console.WriteLine(" ");
     syncManager.AutoPathCreator();
+    syncManager.AutoCreateBackupFolder();
     syncManager.PathInfo();
 
     syncManager.SyncStatus();
-    syncManager.AutoCreateBackupFolder();
     syncManager.AutoBackupDetector();
     
     string Synch = Console.ReadLine();
@@ -53,32 +51,18 @@ while (true){
         syncManager.CloudPath();     
         break;
 
-        case "Å":
-        syncManager.Debugger();
+        case "G":
+        syncManager.TimeTracker();
         break;
-
-        case "T":
-        syncManager.AutoPathDetector();
-        break;
-
-        case "Ø":
-        syncManager.AutoCreateBackupFolder();
-        break;
-
 
         case "Q":
+        syncManager.EmergencySave();
         return;
         break;
     
     }
 }
     public class SynchManager{
-
-        //string sourcePath = @"C:\Liv_Synch_Loader\SourcePath";
-        
-       // string destinationPath = @"C:\Liv_Synch_Loader\DestinationPath";
-        
-        //string cloudPath = @"C:\Users\livki\OneDrive\Liv_Synch_loader";
         
         string cloudPath;
 
@@ -96,6 +80,10 @@ while (true){
         
         string backupPath;
 
+        string emergencyPath;
+
+        string lastTime_emergencyPath;
+
         string programName = "Liv_Synch_Loader";
 
         public SynchManager(){
@@ -103,6 +91,7 @@ while (true){
         backupPath = Path.Combine(localAppData, programName, "Backup");
         sourcePath = Path.Combine(localAppData, programName, "userSource");
         destinationPath = Path.Combine(localAppData, programName, "userDestination");
+        emergencyPath = Path.Combine(localAppData, programName, "emergencyPath");
         OneDrivePath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
         cloudPath = Path.Combine(OneDrivePath, programName, "userOneDrive");
         }
@@ -240,11 +229,6 @@ while (true){
             Console.WriteLine("Current destination path: " + destinationPath);
         }
 
-        public void Debugger(){
-            Console.WriteLine(Directory.Exists(sourcePath));
-            Console.WriteLine(Directory.Exists(destinationPath));
-        }
-
         public void SyncStatus(){
             bool synchStatus(string sourcePath, string destinationPath){
                 string[] files = Directory.GetFiles(
@@ -339,10 +323,32 @@ while (true){
 
         public void AutoCreateBackupFolder(){
             if(!Directory.Exists(backupPath)){
-            Directory.CreateDirectory(backupPath);
-            Console.WriteLine("Backup folder ready: {0}",backupPath);
+                Directory.CreateDirectory(backupPath);
+                Console.WriteLine("Backup folder ready: {0}", backupPath);
             }
         }
+
+        public void EmergencySave(){
+            if(!Directory.Exists(emergencyPath)){
+                Directory.CreateDirectory(emergencyPath);
+                Console.WriteLine("Backup folder ready: {0}", emergencyPath);   
+            }
+            string overridePath = destinationPath;
+            destinationPath = emergencyPath;
+            SyncFiles();
+            destinationPath = overridePath;
+            DateTime lastTime_emergencyPath = DateTime.Now;
+         
+        }
+
+        public void TimeTracker(){
+            DateTime saveNow = DateTime.Now;
+            string old_time_stamp;
+            old_time_stamp = $"{saveNow}";
+            Console.WriteLine("Time: " + old_time_stamp + " when action done");
+            Console.WriteLine("Emergency backup at : " + lastTime_emergencyPath);
+        }
+
 
         public void AutoBackupDetector(){
 
@@ -365,6 +371,7 @@ while (true){
                             Console.WriteLine("Backup is outdated");
                             break;
                         } else if (dt_org < dt_copy){
+                            EmergencySave();
                             Console.WriteLine("Backup is newer");
                             Console.WriteLine("Risk of overwriting!!!");
                             break;

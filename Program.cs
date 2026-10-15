@@ -11,15 +11,20 @@ while (true){
 
     Console.WriteLine("Press A for synch A->B");
     Console.WriteLine("Press B for changing source & destination path");
-    Console.WriteLine("Press C for automatic folder creation");
+    Console.WriteLine("Press C sync to backup immediately");
     Console.WriteLine("Press D for custom path");
     Console.WriteLine("Press E to swap synch direction");
     Console.WriteLine("Press F to cloud synchronization");
+    Console.WriteLine("Press T to test");
+    Console.WriteLine("Press Ø to Bacbkup");
     Console.WriteLine("Press Q to exit program");
     Console.WriteLine(" ");
+    syncManager.AutoPathCreator();
     syncManager.PathInfo();
 
     syncManager.SyncStatus();
+    syncManager.AutoCreateBackupFolder();
+    syncManager.AutoBackupDetector();
     
     string Synch = Console.ReadLine();
     
@@ -33,7 +38,7 @@ while (true){
         break;
     
         case "C":
-        syncManager.AutoPath();
+        syncManager.SynchToBackup();
         break;
         
         case "D":
@@ -52,6 +57,15 @@ while (true){
         syncManager.Debugger();
         break;
 
+        case "T":
+        syncManager.AutoPathDetector();
+        break;
+
+        case "Ø":
+        syncManager.AutoCreateBackupFolder();
+        break;
+
+
         case "Q":
         return;
         break;
@@ -60,16 +74,39 @@ while (true){
 }
     public class SynchManager{
 
-        string sourcePath = @"C:\Liv_Synch_Loader\SourcePath";
+        //string sourcePath = @"C:\Liv_Synch_Loader\SourcePath";
         
-        string destinationPath = @"C:\Liv_Synch_Loader\DestinationPath";
+       // string destinationPath = @"C:\Liv_Synch_Loader\DestinationPath";
         
-        string cloudPath = @"C:\Users\livki\OneDrive\Liv_Synch_loader";
+        //string cloudPath = @"C:\Users\livki\OneDrive\Liv_Synch_loader";
+        
+        string cloudPath;
+
+        string OneDrivePath;
+
+        string sourcePath;
+
+        string destinationPath;
         
         string sourceCloudBackup;
         
         string destinationCloudBackup;
 
+        string localAppData;
+        
+        string backupPath;
+
+        string programName = "Liv_Synch_Loader";
+
+        public SynchManager(){
+        localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+        backupPath = Path.Combine(localAppData, programName, "Backup");
+        sourcePath = Path.Combine(localAppData, programName, "userSource");
+        destinationPath = Path.Combine(localAppData, programName, "userDestination");
+        OneDrivePath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+        cloudPath = Path.Combine(OneDrivePath, programName, "userOneDrive");
+        }
+    
         public void SyncManager(){
             sourceCloudBackup = sourcePath;
             destinationCloudBackup = destinationPath;
@@ -174,10 +211,9 @@ while (true){
             Console.WriteLine("BackupSource is: " + backupDestination + " while newSource is: " + destinationPath);
         }
 
-        public void AutoPath(){
-            sourcePath = @"C:\Liv_Synch_loader\WorldA";
-            destinationPath = @"C:\Liv_Synch_loader\WorldB";
-            Console.WriteLine("Autocreated these paths: " + sourcePath + " & " + destinationPath);
+        public void SynchToBackup(){
+            destinationPath = backupPath;
+            SyncFiles();
         }
 
         public void CloudPath()
@@ -274,4 +310,71 @@ while (true){
                 Console.WriteLine("Something unexpected happened");
             }
         }
+
+        public void AutoPathDetector(){
+            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            if(sourcePath != Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)){
+                Console.WriteLine("User path detected: {0}, do you want to change it?",
+                                 Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
+                Console.WriteLine("Yes or No");
+                string answer_AutoPathDetector = Console.ReadLine();
+                if(answer_AutoPathDetector == "Yes"){
+                    sourcePath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+                } else {
+                    Console.WriteLine("No path is changed");
+                }
+        }
+
     }
+
+        public void AutoPathCreator(){
+            if (!Directory.Exists(sourcePath)){
+                Directory.CreateDirectory(sourcePath);
+            }  
+
+            if (!Directory.Exists(destinationPath)){
+                Directory.CreateDirectory(destinationPath);        
+            }
+        }
+
+        public void AutoCreateBackupFolder(){
+            if(!Directory.Exists(backupPath)){
+            Directory.CreateDirectory(backupPath);
+            Console.WriteLine("Backup folder ready: {0}",backupPath);
+            }
+        }
+
+        public void AutoBackupDetector(){
+
+            if (!Directory.Exists(sourcePath) && !Directory.Exists(backupPath)){
+                Console.WriteLine("No paths detecteced between sourcePath and backupPath");
+            }
+
+            if (Directory.Exists(sourcePath) && Directory.Exists(backupPath)){      
+                string[] files = Directory.GetFiles(sourcePath, "*", SearchOption.AllDirectories);
+                
+                foreach (string file in files)
+                {
+                        string filename = Path.GetRelativePath(sourcePath, file);
+                        string backupFilePath = Path.Combine(backupPath, filename);
+                        string backupPathFolder = Path.GetDirectoryName(backupFilePath);
+                        DateTime dt_org = File.GetLastWriteTimeUtc(file);
+                        DateTime dt_copy = File.GetLastWriteTimeUtc(backupFilePath);
+
+                        if(dt_org > dt_copy){
+                            Console.WriteLine("Backup is outdated");
+                            break;
+                        } else if (dt_org < dt_copy){
+                            Console.WriteLine("Backup is newer");
+                            Console.WriteLine("Risk of overwriting!!! ");
+                            break;
+                        } else {
+                            break;
+                        }
+
+                        
+            }
+            }
+        }
+}
+

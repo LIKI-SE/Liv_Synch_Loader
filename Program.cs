@@ -366,7 +366,7 @@ while (true){
                             break;
                         } else if (dt_org < dt_copy){
                             Console.WriteLine("Backup is newer");
-                            Console.WriteLine("Risk of overwriting!!! ");
+                            Console.WriteLine("Risk of overwriting!!!");
                             break;
                         } else {
                             break;

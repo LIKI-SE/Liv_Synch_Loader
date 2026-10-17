@@ -6,21 +6,14 @@ SynchManager syncManager = new SynchManager();
 
 Console.WriteLine("Hello, welcome to Liv_Synch_Loader");
 
-while (true){
-    Console.WriteLine(" ");
+syncManager.IntroDialogue();
 
-    Console.WriteLine("Press A for synch A->B");
-    Console.WriteLine("Press B for changing source & destination path");
-    Console.WriteLine("Press C sync to backup immediately");
-    Console.WriteLine("Press D for custom path");
-    Console.WriteLine("Press E to swap synch direction");
-    Console.WriteLine("Press F to cloud synchronization");
-    Console.WriteLine("Press Q to exit program");
-    Console.WriteLine(" ");
+while (true){
     syncManager.AutoPathCreator();
     syncManager.AutoCreateBackupFolder();
+    Console.WriteLine(" ");
     syncManager.PathInfo();
-
+    Console.WriteLine(" ");
     syncManager.SyncStatus();
     syncManager.AutoBackupDetector();
     
@@ -52,7 +45,11 @@ while (true){
         break;
 
         case "G":
-        syncManager.TimeTracker();
+        syncManager.IntroDialogue();
+        break;
+
+        case "H":
+        syncManager.EnableSpam();
         break;
 
         case "Q":
@@ -86,6 +83,8 @@ while (true){
 
         string programName = "Liv_Synch_Loader";
 
+        bool x = false;
+
         public SynchManager(){
         localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
         backupPath = Path.Combine(localAppData, programName, "Backup");
@@ -100,10 +99,19 @@ while (true){
             sourceCloudBackup = sourcePath;
             destinationCloudBackup = destinationPath;
         }
+
+        public bool EnableSpam(){
+            if (x == true){
+                x = false;
+                return false;
+            } else {
+                x = true;
+                return true;
+            }      
+        }
         
         
         public void SyncFiles(){
-
                    
             if (Directory.Exists(sourcePath) && Directory.Exists(destinationPath))
             {
@@ -114,8 +122,10 @@ while (true){
                     "*",
                     SearchOption.AllDirectories
                 );
-        
-                Console.WriteLine(sourcePath + " created at " + dt + " time");
+
+                if (x == true){
+                    Console.WriteLine(sourcePath + " created at " + dt + " time");
+                }
         
                 foreach (string file in files)
                 {
@@ -135,7 +145,9 @@ while (true){
                         if (!File.Exists(destination))
                         {
                             File.Copy(file, destination);
+                            if (x == true){
                             Console.WriteLine("File copied: " + filename);
+                            }
                         }
                         else
                         {
@@ -143,12 +155,14 @@ while (true){
         
                             if (dt_org > dt_copy)
                             {
+                                if (x == true){
                                 Console.WriteLine("Source is newer: " + filename);
+                                }
         
                                 File.Delete(destination);
                                 File.Copy(file, destination);
                             }
-                            else if (dt_org < dt_copy)
+                            else if (dt_org < dt_copy && (x == true))
                             {
                                 Console.WriteLine("Destination is newer: " + filename);
                                 Console.WriteLine("Risk of overwriting!!! ");
@@ -156,14 +170,18 @@ while (true){
                             }
                             else
                             {
+                                if (x == true){
                                 Console.WriteLine("File skipped: " + filename);
+                                }
                             }
                         }
                     }
                     catch
                     {
                         string filename = Path.GetFileName(file);
+                        if (x == true){
                         Console.WriteLine("This file had a copy issue: " + filename);
+                        }
                     }
                 }
             }
@@ -189,15 +207,18 @@ while (true){
         }
 
         public void DirectionSwap(){
+            if (x == true){
             Console.WriteLine("Old order is from " + sourcePath + " to " + destinationPath);
+            }
             string backupSource = sourcePath;
             string backupDestination = destinationPath;
             sourcePath = backupDestination;
             destinationPath = backupSource;
-            
+            if (x == true){
             Console.WriteLine("Synch direction has reversed!");
             Console.WriteLine("BackupSource is: " + backupSource + " while newSource is: " + sourcePath);
             Console.WriteLine("BackupSource is: " + backupDestination + " while newSource is: " + destinationPath);
+            }
         }
 
         public void SynchToBackup(){
@@ -251,10 +272,10 @@ while (true){
                     
                     if (!File.Exists(destinationFile))
                     {
-                        Console.WriteLine(
-                            "Mismatch: " + relativePath +
-                            " located at: " + destinationFile
-                        );
+                        if (x == true){
+                        Console.WriteLine(" ");
+                        Console.WriteLine("Mismatch: " + relativePath + " located at: " + destinationFile);
+                        }
                     
                         return true;
                     }
@@ -285,13 +306,17 @@ while (true){
                 if (sourceMismatch || destinationMismatch){
                         Console.WriteLine("!!!Synch needed!!!");
             } else {
-                Console.WriteLine("Folders are synched!");   
+                if (x == true){
+                Console.WriteLine("Folders are synched!");  
+               } 
             }
             
         
             }
             catch{
+                if (x == true){
                 Console.WriteLine("Something unexpected happened");
+                }
             }
         }
 
@@ -349,6 +374,21 @@ while (true){
             Console.WriteLine("Emergency backup at : " + lastTime_emergencyPath);
         }
 
+        public void IntroDialogue(){
+            Console.WriteLine(" ");
+        
+            Console.WriteLine("Press A for synch A->B");
+            Console.WriteLine("Press B for changing source & destination path");
+            Console.WriteLine("Press C sync to backup immediately");
+            Console.WriteLine("Press D for custom path");
+            Console.WriteLine("Press E to swap synch direction");
+            Console.WriteLine("Press F to cloud synchronization");
+            Console.WriteLine("Press G to make options reappear");
+            Console.WriteLine("Press Q to exit program");
+            Console.WriteLine("Press H to toogle file info");
+            Console.WriteLine(" "); 
+        }
+
 
         public void AutoBackupDetector(){
 
@@ -368,7 +408,9 @@ while (true){
                         DateTime dt_copy = File.GetLastWriteTimeUtc(backupFilePath);
 
                         if(dt_org > dt_copy){
+                            if (x == true){
                             Console.WriteLine("Backup is outdated");
+                            }
                             break;
                         } else if (dt_org < dt_copy){
                             EmergencySave();

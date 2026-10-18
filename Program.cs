@@ -1,64 +1,76 @@
-﻿using System.IO;
+﻿using System.Windows.Forms;
+using System.IO;
 using System;
 
 
-SynchManager syncManager = new SynchManager();
+class Program
+{
+    [STAThread]
+    static void Main()
+    {
+        SynchManager syncManager = new SynchManager();
 
-Console.WriteLine("Hello, welcome to Liv_Synch_Loader");
-
-syncManager.IntroDialogue();
-
-while (true){
-    syncManager.AutoPathCreator();
-    syncManager.AutoCreateBackupFolder();
-    Console.WriteLine(" ");
-    syncManager.PathInfo();
-    Console.WriteLine(" ");
-    syncManager.SyncStatus();
-    syncManager.AutoBackupDetector();
-    
-    string Synch = Console.ReadLine();
-    
-    switch (Synch){
-        case "A":
-        syncManager.SyncFiles();
-        break;
+        Console.WriteLine("Hello, welcome to Liv_Synch_Loader");
         
-        case "B":
-        syncManager.CustomPath();
-        break;
-    
-        case "C":
-        syncManager.SynchToBackup();
-        break;
-        
-        case "D":
-        syncManager.PremadePath();
-        break;
-        
-        case "E":
-        syncManager.DirectionSwap();
-        break;
-
-        case "F":
-        syncManager.CloudPath();     
-        break;
-
-        case "G":
         syncManager.IntroDialogue();
-        break;
+        
+        while (true){
+            syncManager.AutoPathCreator();
+            syncManager.AutoCreateBackupFolder();
+            Console.WriteLine(" ");
+            syncManager.PathInfo();
+            Console.WriteLine(" ");
+            syncManager.SyncStatus();
+            syncManager.AutoBackupDetector();
+            
+            string Synch = Console.ReadLine();
+            
+            switch (Synch){
+                case "A":
+                syncManager.SyncFiles();
+                break;
+                
+                case "B":
+                syncManager.ChooseSourceFolder();
+                break;
+            
+                case "C":
+                syncManager.SynchToBackup();
+                break;
+                
+                case "D":
+                syncManager.DirectionSwap();
+                break;
+                
+                case "E":
+                syncManager.CloudPath();
+                break;
+        
+                case "F":
+                syncManager.IntroDialogue();     
+                break;
+        
+                case "G":
+                syncManager.ToogleAdditionalFileInfo();
+                break;
 
-        case "H":
-        syncManager.EnableSpam();
-        break;
+                case "H":
+                syncManager.ToogleSynchBackupInfo();
+                break;
+        
+                case "Q":
+                syncManager.EmergencySave();
+                return;
+                break;
+            
+            }
+        }
 
-        case "Q":
-        syncManager.EmergencySave();
-        return;
-        break;
-    
+        
     }
 }
+
+
     public class SynchManager{
         
         string cloudPath;
@@ -83,7 +95,11 @@ while (true){
 
         string programName = "Liv_Synch_Loader";
 
-        bool x = false;
+        bool x = false; // Generic text variable
+
+        bool y = true; // Synchronization text only
+
+        bool z = true; // Backup text only
 
         public SynchManager(){
         localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
@@ -100,7 +116,7 @@ while (true){
             destinationCloudBackup = destinationPath;
         }
 
-        public bool EnableSpam(){
+        public bool ToogleAdditionalFileInfo(){
             if (x == true){
                 x = false;
                 return false;
@@ -304,9 +320,11 @@ while (true){
         
             try{
                 if (sourceMismatch || destinationMismatch){
+                        if (y == true){
                         Console.WriteLine("!!!Synch needed!!!");
+                        }
             } else {
-                if (x == true){
+                if (y == true){
                 Console.WriteLine("Folders are synched!");  
                } 
             }
@@ -314,7 +332,7 @@ while (true){
         
             }
             catch{
-                if (x == true){
+                if (y == true){
                 Console.WriteLine("Something unexpected happened");
                 }
             }
@@ -375,18 +393,51 @@ while (true){
         }
 
         public void IntroDialogue(){
-            Console.WriteLine(" ");
-        
+            Console.WriteLine(" ");   
             Console.WriteLine("Press A for synch A->B");
             Console.WriteLine("Press B for changing source & destination path");
             Console.WriteLine("Press C sync to backup immediately");
-            Console.WriteLine("Press D for custom path");
-            Console.WriteLine("Press E to swap synch direction");
-            Console.WriteLine("Press F to cloud synchronization");
-            Console.WriteLine("Press G to make options reappear");
+            Console.WriteLine("Press D to swap synch direction");
+            Console.WriteLine("Press E to cloud synchronization");
+            Console.WriteLine("Press F to make options reappear");
+            Console.WriteLine("Press G to toogle file info");
+            Console.WriteLine("Press H to toogle sync and backup info");
             Console.WriteLine("Press Q to exit program");
-            Console.WriteLine("Press H to toogle file info");
             Console.WriteLine(" "); 
+        }
+
+        public void ToogleSynchBackupInfo(){
+            if (z == true && y == true){
+                z = false;
+                y = false;
+            } else {
+                z = true;
+                y = true;  
+            }
+        }
+
+        public void ChooseSourceFolder()
+        {
+            using FolderBrowserDialog dialog = new FolderBrowserDialog();
+        
+            dialog.Description = "Choose source folder";
+        
+            if (dialog.ShowDialog() == DialogResult.OK)
+            {
+                string selectedPath = dialog.SelectedPath;
+
+                if (x == true){
+                Console.WriteLine("Selected folder: " + selectedPath);
+                }
+
+                sourcePath = dialog.SelectedPath;
+            }
+            else
+            {
+                if (x == true){
+                Console.WriteLine("No folder selected.");
+                }
+            }
         }
 
 
@@ -408,14 +459,16 @@ while (true){
                         DateTime dt_copy = File.GetLastWriteTimeUtc(backupFilePath);
 
                         if(dt_org > dt_copy){
-                            if (x == true){
+                            if (z == true){
                             Console.WriteLine("Backup is outdated");
                             }
                             break;
                         } else if (dt_org < dt_copy){
                             EmergencySave();
+                            if (z == true){
                             Console.WriteLine("Backup is newer");
                             Console.WriteLine("Risk of overwriting!!!");
+                            }
                             break;
                         } else {
                             break;

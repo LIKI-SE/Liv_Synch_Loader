@@ -1,0 +1,23 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v10.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v10.0": {
+      "Liv_Synch_Loader/1.0.0": {
+        "runtime": {
+          "Liv_Synch_Loader.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "Liv_Synch_Loader/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}
